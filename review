@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+IFS=$'\n' # Set the IFS to newline character
+files=$(bash /home/fernando/bench/review-system/src/find_yesterdays_notes.sh)
+
+REVIEW_DIR="${1:-${HOME}/review}"
+mkdir -p $REVIEW_DIR
+
+for file in $files; do
+    echo "$file"
+    cp "$file" $REVIEW_DIR
+done
+
+ls $REVIEW_DIR
+echo "Done!"
