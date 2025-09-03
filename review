@@ -1,15 +1,60 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
-IFS=$'\n' # Set the IFS to newline character
-files=$(bash /home/fernando/bench/review-system/src/find_yesterdays_notes.sh)
+# === Paths ===
+PROMPT_FILE="$HOME/bench/review-system/prompt.txt"
+NOTES_DIR="$HOME/Vault"
+YESTERDAY_NOTES_DIR="$HOME/review/yesterday_notes"
+REVIEWS_DIR="$HOME/review/reviews"
 
-REVIEW_DIR="${1:-${HOME}/review}"
-mkdir -p $REVIEW_DIR
+# === Date ===
+DATE="$(date -d "yesterday" +"%d-%m-%Y")"
 
-for file in $files; do
-    echo "$file"
-    cp "$file" $REVIEW_DIR
-done
+# === Output files ===
+YESTERDAY_FILE="$YESTERDAY_NOTES_DIR/${DATE}.md"
+REVIEW_FILE="$REVIEWS_DIR/${DATE}.md"
 
-ls $REVIEW_DIR
-echo "Done!"
+# === Ensure dirs exist ===
+mkdir -p "$YESTERDAY_NOTES_DIR" "$REVIEWS_DIR"
+
+# === Get yesterday's files from your finder script (one path per line) ===
+mapfile -t FILES < <("$HOME/bench/review-system/src/find_yesterdays_notes.sh" "$NOTES_DIR")
+
+if ((${#FILES[@]} == 0)); then
+  echo "No notes found for yesterday in: $NOTES_DIR"
+  exit 0
+fi
+
+# === Concatenate notes into a single file (handles spaces safely) ===
+{
+  echo "# Notes from $DATE"
+  echo
+  for f in "${FILES[@]}"; do
+    [[ -n "$f" ]] || continue
+    echo
+    echo "----- $(basename "$f") -----"
+    echo
+    cat "$f"
+    echo
+  done
+} > "$YESTERDAY_FILE"
+
+echo "✅ Consolidated notes: $YESTERDAY_FILE"
+
+# === Compose model input: PROMPT first, then the NOTES ===
+MODEL_INPUT="$(mktemp)"
+{
+  cat "$PROMPT_FILE"
+  echo
+  echo "### NOTES ###"
+  cat "$YESTERDAY_FILE"
+} > "$MODEL_INPUT"
+
+# === Run Gemini (alias -> npx gemini). -p " " forces non-interactive mode. ===
+cat "$MODEL_INPUT" | npx gemini \
+  -m gemini-2.5-pro \
+  -p " " \
+  > "$REVIEW_FILE"
+
+echo "✅ Review generated: $REVIEW_FILE"
+
