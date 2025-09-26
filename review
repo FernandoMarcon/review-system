@@ -17,11 +17,13 @@ DATE="$(date -d "yesterday" +"%d-%m-%Y")"
 YESTERDAY_FILE="$YESTERDAY_NOTES/${DATE}.md"
 REVIEW_FILE="$REVIEWS_DIR/${DATE}.md"
 
+YESTERDAY_FILE_TMP="./tmp/yesterday.md"
+REVIEW_TMP="./tmp/review.md"
+
 # === Ensure dirs exist ===
-mkdir -p "$YESTERDAY_NOTES" "$REVIEWS_DIR"
+mkdir -p "$YESTERDAY_NOTES" "$REVIEWS_DIR" ./tmp
 
 # === Get yesterday's files from your finder script (one path per line) ===
-rm $YESTERDAY_FILE $REVIEW_FILE
 mapfile -t FILES < <("$findnotes" "$VAULT")
 
 if ((${#FILES[@]} == 0)); then
@@ -41,21 +43,17 @@ fi
     cat "$f"
     echo
   done
-} > "$YESTERDAY_FILE"
+} > "$YESTERDAY_FILE_TMP"
+# } > "$YESTERDAY_FILE"
 
 echo "✅ Consolidated notes: $YESTERDAY_FILE"
 
-# # === Compose model input: PROMPT first, then the NOTES ===
-# MODEL_INPUT="$(mktemp)"
-# {
-#   cat "$PROMPT_FILE"
-#   echo
-#   echo "### NOTES ###"
-#   cat "$YESTERDAY_FILE"
-# } > "$MODEL_INPUT"
-
 # === Run Gemini (alias -> npx gemini). -p " " forces non-interactive mode. ===
 echo "Running LLM..."
-npx gemini -p "$(cat ${PROMPT_FILE})${YESTERDAY_FILE}" > $REVIEW_FILE
+npx gemini -p "$(cat ${PROMPT_FILE})${YESTERDAY_FILE_TMP}" > $REVIEW_TMP
+
+mv $YESTERDAY_FILE_TMP $YESTERDAY_FILE
+mv $REVIEW_TMP $REVIEW_FILE
+rmdir ./tmp
 
 echo "✅ Review generated: $REVIEW_FILE"
