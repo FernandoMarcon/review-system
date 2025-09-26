@@ -6,3 +6,6 @@
 - Notes to ignore:
     - Daily notes
     - Previous reviews: `/home/fernando/Vault/3. Review/`
+
+**Prompt:**
+- [ ] Correct the flashcard question/answer format, so it can be folded
