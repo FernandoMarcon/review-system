@@ -8,4 +8,8 @@
     - Previous reviews: `/home/fernando/Vault/3. Review/`
 
 **Prompt:**
-- [ ] Correct the flashcard question/answer format, so it can be folded
+- [ ] Correct the flashcard question/answer format, so it can be folded:
+```md
+- Q: this is the question
+  A: this is the answer
+```
