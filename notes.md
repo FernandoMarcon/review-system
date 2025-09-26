@@ -13,3 +13,4 @@
 - Q: this is the question
   A: this is the answer
 ```
+    - How to setup obsidian to always start up a document with the items folded?
