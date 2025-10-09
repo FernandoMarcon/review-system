@@ -1,0 +1,20 @@
+services:
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Set the timezone to ensure correct scheduling of workflows
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+    volumes:
+      - data:/home/node/.n8n
+      - ~/n8n/review:/home/node/review
+    # command: start --tunnel
+
+volumes:
+  data:
