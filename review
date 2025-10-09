@@ -6,7 +6,7 @@ PROMPT_FILE="$HOME/utils/review-system/prompt_md-output.md"
 findnotes="$HOME/utils/review-system/src/find_yesterdays_notes.sh"
 
 VAULT="$HOME/Vault"
-REVIEW="$VAULT/Review"
+REVIEW="${VAULT}/3.\ Review"
 YESTERDAY_NOTES="$REVIEW/yesterday_notes"
 REVIEWS_DIR="$REVIEW/reviews"
 
